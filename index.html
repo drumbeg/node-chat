@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Dave Chat</title>
+    <style>
+      #messages {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        overflow-y: auto;
+      }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+      #footer {
+        position: fixed;
+        height: 50px;
+        bottom: 0;
+        width: 100%;
+        background: linear-gradient(black, gray);
+      }
+      form {
+        display: inline-block;
+        padding: 7px;
+      }
+      #onlineContainer {
+        background: linear-gradient(pink, white);
+      }
+    </style>
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"></script>
+    </head>
+  <body>
+    <div class="container-fluid">
+      <ul id="messages" class="col-md-9"></ul>
+      <section id ="onlineContainer" class="col-md-3">People Online
+        <ul id="online"></ul>
+      </section>
+    </div>
+    <section id="footer">
+      <form id="change" action="" class="form-group">
+        <input id="nick" autocomplete="off" placeholder="Enter a nickname" />
+        <button class="btn btn-primary">Change</button>
+      </form>
+      <form id="send" action="" class="form-group">
+        <input id="m" autocomplete="off" />
+        <button class="btn btn-success">Send</button>
+      </form>
+    </section>
+    <script>
+      var socket = io.connect('http://localhost:3000');
+
+      $('form#send').submit( function () {
+        socket.emit('chat message', $('#m').val());
+        $('#m').val('');
+        return false;
+      });
+
+      $('form#change').submit (function () {
+        socket.emit('set nick', $('#nick').val());
+        $('#nick').val('');
+        return false;
+      });
+
+      socket.on('print', function (msg) {
+        $('#messages').append($('<li>').text(msg));
+      });
+
+      socket.on('update online list', function (people) {
+        $('#online').html('');
+        $.each(people, function () {
+          $('#online').append($('<li>').text(this));
+        });
+      });
+    </script>
+  </body>
+</html>
